@@ -6,6 +6,7 @@ ROOT_PATH = Path(__file__).parent
 
 conexao = sqlite3.connect(ROOT_PATH / "banco_teste.db")
 cursor = conexao.cursor()
+cursor.row_factory = sqlite3.Row # Faz retornar um dicionario
 
 def criar_tabela(conexao, cursor):
     cursor.execute("CREATE TABLE cliente(id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR(100), email VARCHAR(150))")
@@ -29,6 +30,22 @@ def excluir_registro(conexao, cursor, id):
 def inserir_muitos(conexao, cursor, dados):
     cursor.executemany("INSERT INTO cliente (nome, email) VALUES (?,?)", dados)
     conexao.commit()    
+
+def recuperar_cliente(cursor, id):
+    cursor.execute("SELECT nome FROM cliente WHERE id=?", (id,))
+    return cursor.fetchone() # Retorna so um valor
+
+def listar_clientes(cursor):
+    return cursor.execute("SELECT nome FROM cliente;")
+
+clientes = listar_clientes(cursor)
+for nome in clientes:
+    print(dict(nome))
+
+cliente = recuperar_cliente(cursor, 1)
+print(dict(cliente))
+print(f"O cliente e {cliente['nome']}") # Excelente para deixar o codigo legivel
+
 
 # Para inserir multiplos dados faz uma lista de tuplas
 # é interessante pois faz 1 commit e economiza recursos do sistema
